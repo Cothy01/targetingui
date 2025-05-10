@@ -18,7 +18,7 @@ function targetingui.setup()
     frame.Parent = gui
     frame.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
     frame.BorderSizePixel = 0
-    frame.Position = UDim2.new(0.5, -183, 0.6, 0)
+    frame.Position = UDim2.new(0.5, -183, 0.8, 0)
     frame.Size = UDim2.new(0, 367, 0, 146)
 
     local corner = Instance.new("UICorner")

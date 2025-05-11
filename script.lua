@@ -4,6 +4,7 @@ local gui
 
 function targetingui.setup()
     local Players = game:GetService("Players")
+    local RunService = game:GetService("RunService")
     local playerGui = Players.LocalPlayer:WaitForChild("PlayerGui")
 
     -- === Main GUI ===
@@ -16,30 +17,45 @@ function targetingui.setup()
     local frame = Instance.new("Frame")
     frame.Name = "TargetingFrame"
     frame.Parent = gui
-    frame.BackgroundColor3 = Color3.fromRGB(20, 20, 30) -- darker for modern look
+    frame.BackgroundColor3 = Color3.fromRGB(25, 25, 40)
     frame.BorderSizePixel = 0
-    frame.Position = UDim2.new(0.5, -150, 0.75, 0)
-    frame.Size = UDim2.new(0, 300, 0, 110)
+    frame.Position = UDim2.new(0.5, -175, 0.75, 0)
+    frame.Size = UDim2.new(0, 350, 0, 140)
 
     local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(0, 10) -- smoother corners
+    corner.CornerRadius = UDim.new(0, 6) -- less curvy
     corner.Parent = frame
 
     -- === Make draggable ===
     frame.Active = true
     frame.Draggable = true
 
+    -- === Top bar effect ===
+    local topEffect = Instance.new("ImageLabel")
+    topEffect.Name = "TopEffect"
+    topEffect.Parent = frame
+    topEffect.BackgroundTransparency = 1
+    topEffect.Image = "rbxassetid://14239914881"
+    topEffect.Size = UDim2.new(1, 0, 0, 10) -- small strip on top
+    topEffect.Position = UDim2.new(0, 0, 0, 0)
+    topEffect.ImageColor3 = Color3.fromRGB(0, 255, 0)
+
+    -- === Animate topEffect color ===
+    RunService.RenderStepped:Connect(function()
+        topEffect.ImageColor3 = topEffect.ImageColor3:Lerp(Color3.fromRGB(0, 255, 0), 0.02)
+    end)
+
     -- === Username ===
     local usernameLabel = Instance.new("TextLabel")
     usernameLabel.Name = "TargetUsername"
     usernameLabel.Parent = frame
     usernameLabel.BackgroundTransparency = 1
-    usernameLabel.Position = UDim2.new(0.3, 0, 0, 0)
-    usernameLabel.Size = UDim2.new(0.7, -5, 0, 25)
+    usernameLabel.Position = UDim2.new(0.3, 0, 0, 5)
+    usernameLabel.Size = UDim2.new(0.7, -5, 0, 30)
     usernameLabel.Font = Enum.Font.GothamBold
     usernameLabel.Text = "Target Username"
     usernameLabel.TextColor3 = Color3.fromRGB(255, 200, 255)
-    usernameLabel.TextSize = 12 -- way smaller
+    usernameLabel.TextSize = 16
 
     -- === Avatar ===
     local image = Instance.new("ImageLabel")
@@ -47,11 +63,11 @@ function targetingui.setup()
     image.Parent = frame
     image.BackgroundTransparency = 1
     image.Position = UDim2.new(0.025, 0, 0.25, 0)
-    image.Size = UDim2.new(0, 60, 0, 60)
+    image.Size = UDim2.new(0, 75, 0, 75)
     image.Image = "rbxasset://textures/ui/GuiImagePlaceholder.png"
 
     local imageCorner = Instance.new("UICorner")
-    imageCorner.CornerRadius = UDim.new(0, 10)
+    imageCorner.CornerRadius = UDim.new(0, 8)
     imageCorner.Parent = image
 
     -- === Stat bars function ===
@@ -61,18 +77,16 @@ function targetingui.setup()
         holder.Parent = frame
         holder.BackgroundTransparency = 1
         holder.Position = UDim2.new(0.3, 0, posY, 0)
-        holder.Size = UDim2.new(0.65, 0, 0, 15)
+        holder.Size = UDim2.new(0.65, 0, 0, 20)
 
-        -- background bar
         local bg = Instance.new("Frame")
         bg.Parent = holder
-        bg.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
+        bg.BackgroundColor3 = Color3.fromRGB(40, 40, 55)
         bg.Size = UDim2.new(1, 0, 1, 0)
         bg.BorderSizePixel = 0
         local bgCorner = Instance.new("UICorner", bg)
-        bgCorner.CornerRadius = UDim.new(0, 5)
+        bgCorner.CornerRadius = UDim.new(0, 4)
 
-        -- fill bar (changes with value)
         local fill = Instance.new("Frame")
         fill.Name = "Fill"
         fill.Parent = holder
@@ -80,9 +94,8 @@ function targetingui.setup()
         fill.Size = UDim2.new(0, 0, 1, 0)
         fill.BorderSizePixel = 0
         local fillCorner = Instance.new("UICorner", fill)
-        fillCorner.CornerRadius = UDim.new(0, 5)
+        fillCorner.CornerRadius = UDim.new(0, 4)
 
-        -- gradient for fancy color
         local gradient = Instance.new("UIGradient")
         gradient.Color = ColorSequence.new{
             ColorSequenceKeypoint.new(0, color1),
@@ -91,7 +104,6 @@ function targetingui.setup()
         gradient.Rotation = 90
         gradient.Parent = fill
 
-        -- stat % label
         local label = Instance.new("TextLabel")
         label.Name = "Value"
         label.Parent = holder
@@ -100,16 +112,16 @@ function targetingui.setup()
         label.Font = Enum.Font.Gotham
         label.Text = name .. ": 0%"
         label.TextColor3 = Color3.fromRGB(255, 255, 255)
-        label.TextSize = 11
+        label.TextSize = 13
         label.TextXAlignment = Enum.TextXAlignment.Center
 
         return holder
     end
 
     -- === Create Bars ===
-    gui.HealthBar = makeBar("Health", Color3.fromRGB(85, 255, 128), Color3.fromRGB(0, 200, 100), 0.3)
-    gui.ShieldBar = makeBar("Shield", Color3.fromRGB(85, 200, 255), Color3.fromRGB(0, 100, 255), 0.5)
-    gui.DownedBar = makeBar("Downed", Color3.fromRGB(255, 100, 100), Color3.fromRGB(255, 50, 50), 0.7)
+    gui.HealthBar = makeBar("Health", Color3.fromRGB(85, 255, 128), Color3.fromRGB(0, 200, 100), 0.35)
+    gui.ShieldBar = makeBar("Shield", Color3.fromRGB(85, 200, 255), Color3.fromRGB(0, 100, 255), 0.55)
+    gui.DownedBar = makeBar("Downed", Color3.fromRGB(255, 100, 100), Color3.fromRGB(255, 50, 50), 0.75)
 end
 
 -- === Update Function ===
@@ -119,16 +131,13 @@ function targetingui.update(data)
     local Players = game:GetService("Players")
     local PLACEHOLDER_IMAGE = "rbxassetid://0"
 
-    -- Update username
     gui.TargetingFrame.TargetUsername.Text = data.username or "Unknown"
 
-    -- Update avatar
     if data.userid then
         local content, isReady = Players:GetUserThumbnailAsync(data.userid, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size420x420)
         gui.TargetingFrame.TargetingImage.Image = isReady and content or PLACEHOLDER_IMAGE
     end
 
-    -- Helper to update bars
     local function updateBar(holder, value)
         value = math.clamp(tonumber(value) or 0, 0, 100)
         local fill = holder.Fill

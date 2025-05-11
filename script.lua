@@ -1,20 +1,21 @@
-local espui = {}
+-- targetingui.lua
+local targetingui = {}
 
 local gui
 
-function espui.setup()
+function targetingui.setup()
     local Players = game:GetService("Players")
     local playerGui = Players.LocalPlayer:WaitForChild("PlayerGui")
 
     -- === Main GUI ===
     gui = Instance.new("ScreenGui")
-    gui.Name = "EspGui"
+    gui.Name = "TargetGui"
     gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
     gui.Parent = playerGui
 
     -- === Main Frame ===
     local frame = Instance.new("Frame")
-    frame.Name = "EspFrame"
+    frame.Name = "TargetFrame"
     frame.Parent = gui
     frame.BackgroundColor3 = Color3.fromRGB(25, 25, 40)
     frame.BorderSizePixel = 0
@@ -25,13 +26,26 @@ function espui.setup()
     corner.CornerRadius = UDim.new(0, 6)
     corner.Parent = frame
 
-    -- === Make draggable ===
+    -- === Make draggable so it’s easy to move around ===
     frame.Active = true
     frame.Draggable = true
 
+    -- === Title Label (Targeting UI title) ===
+    local titleLabel = Instance.new("TextLabel")
+    titleLabel.Name = "TargetTitle"
+    titleLabel.Parent = frame
+    titleLabel.BackgroundTransparency = 1
+    titleLabel.Position = UDim2.new(0, 0, 0, -20)
+    titleLabel.Size = UDim2.new(1, 0, 0, 20)
+    titleLabel.Font = Enum.Font.GothamBold
+    titleLabel.Text = "Target Locked"
+    titleLabel.TextColor3 = Color3.fromRGB(255, 85, 85)
+    titleLabel.TextSize = 14
+    titleLabel.TextXAlignment = Enum.TextXAlignment.Center
+
     -- === Username label ===
     local usernameLabel = Instance.new("TextLabel")
-    usernameLabel.Name = "EspUsername"
+    usernameLabel.Name = "TargetUsername"
     usernameLabel.Parent = frame
     usernameLabel.BackgroundTransparency = 1
     usernameLabel.Position = UDim2.new(0.3, 0, 0, 5)
@@ -43,7 +57,7 @@ function espui.setup()
 
     -- === Avatar image ===
     local image = Instance.new("ImageLabel")
-    image.Name = "EspImage"
+    image.Name = "TargetImage"
     image.Parent = frame
     image.BackgroundTransparency = 1
     image.Position = UDim2.new(0.025, 0, 0.25, 0)
@@ -54,7 +68,7 @@ function espui.setup()
     imageCorner.CornerRadius = UDim.new(0, 8)
     imageCorner.Parent = image
 
-    -- === Stat bars function ===
+    -- === Stat bars creator ===
     local function makeBar(name, color1, color2, posY)
         local holder = Instance.new("Frame")
         holder.Name = name .. "Holder"
@@ -102,11 +116,11 @@ function espui.setup()
         return holder
     end
 
-    -- === Create Bars ===
+    -- === Create Bars (Health + Shield) ===
     gui.HealthBar = makeBar("Health", Color3.fromRGB(85, 255, 128), Color3.fromRGB(0, 200, 100), 0.35)
     gui.ShieldBar = makeBar("Shield", Color3.fromRGB(85, 200, 255), Color3.fromRGB(0, 100, 255), 0.55)
 
-    -- === Downed Bool Label ===
+    -- === Downed Status Label ===
     local downedLabel = Instance.new("TextLabel")
     downedLabel.Name = "DownedLabel"
     downedLabel.Parent = frame
@@ -120,18 +134,18 @@ function espui.setup()
     downedLabel.TextXAlignment = Enum.TextXAlignment.Center
 end
 
--- === Update Function ===
-function espui.update(data)
+-- === Update Function (target info updater) ===
+function targetingui.update(data)
     if not gui then return end
 
     local Players = game:GetService("Players")
     local PLACEHOLDER_IMAGE = "rbxassetid://0"
 
-    gui.EspFrame.EspUsername.Text = data.username or "Unknown"
+    gui.TargetFrame.TargetUsername.Text = data.username or "Unknown"
 
     if data.userid then
         local content, isReady = Players:GetUserThumbnailAsync(data.userid, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size420x420)
-        gui.EspFrame.EspImage.Image = isReady and content or PLACEHOLDER_IMAGE
+        gui.TargetFrame.TargetImage.Image = isReady and content or PLACEHOLDER_IMAGE
     end
 
     local function updateBar(holder, value)
@@ -144,9 +158,9 @@ function espui.update(data)
     updateBar(gui.HealthBar, data.health)
     updateBar(gui.ShieldBar, data.shield)
 
-    -- === Downed Update ===
+    -- === Downed status update ===
     if data.downed ~= nil then
-        local label = gui.EspFrame.DownedLabel
+        local label = gui.TargetFrame.DownedLabel
         if data.downed == true then
             label.Text = "Downed: YES"
             label.TextColor3 = Color3.fromRGB(255, 50, 50)
@@ -157,4 +171,4 @@ function espui.update(data)
     end
 end
 
-return espui
+return targetingui

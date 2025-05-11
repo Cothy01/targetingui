@@ -1,13 +1,12 @@
 local targetingui = {}
 
-local gui -- We'll store the GUI here so we can update it later
+local gui
 
--- Setup function (creates the UI)
 function targetingui.setup()
     local Players = game:GetService("Players")
     local playerGui = Players.LocalPlayer:WaitForChild("PlayerGui")
 
-    -- === GUI Creation ===
+    -- === Main GUI ===
     gui = Instance.new("ScreenGui")
     gui.Name = "TargetingGui"
     gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
@@ -17,103 +16,129 @@ function targetingui.setup()
     local frame = Instance.new("Frame")
     frame.Name = "TargetingFrame"
     frame.Parent = gui
-    frame.BackgroundColor3 = Color3.fromRGB(45, 45, 60) -- dark but not pure black
+    frame.BackgroundColor3 = Color3.fromRGB(20, 20, 30) -- darker for modern look
     frame.BorderSizePixel = 0
-    frame.Position = UDim2.new(0.5, -140, 0.75, 0)
-    frame.Size = UDim2.new(0, 280, 0, 130)
-    frame.Active = true -- Needed for dragging
-    frame.Draggable = true -- Makes it draggable just by default (simple way)
+    frame.Position = UDim2.new(0.5, -150, 0.75, 0)
+    frame.Size = UDim2.new(0, 300, 0, 110)
 
-    -- Round corners (slight curve looks modern)
     local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(0, 12)
+    corner.CornerRadius = UDim.new(0, 10) -- smoother corners
     corner.Parent = frame
 
-    -- Gradient background (looks cooler)
-    local gradient = Instance.new("UIGradient")
-    gradient.Color = ColorSequence.new{
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(60, 60, 90)),
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(30, 30, 50))
-    }
-    gradient.Rotation = 45
-    gradient.Parent = frame
+    -- === Make draggable ===
+    frame.Active = true
+    frame.Draggable = true
 
-    -- === Username Label ===
+    -- === Username ===
     local usernameLabel = Instance.new("TextLabel")
     usernameLabel.Name = "TargetUsername"
     usernameLabel.Parent = frame
     usernameLabel.BackgroundTransparency = 1
-    usernameLabel.Position = UDim2.new(0.3, 0, 0, 5)
-    usernameLabel.Size = UDim2.new(0.6, -5, 0, 25)
+    usernameLabel.Position = UDim2.new(0.3, 0, 0, 0)
+    usernameLabel.Size = UDim2.new(0.7, -5, 0, 25)
     usernameLabel.Font = Enum.Font.GothamBold
     usernameLabel.Text = "Target Username"
-    usernameLabel.TextColor3 = Color3.fromRGB(255, 170, 255)
-    usernameLabel.TextScaled = true
+    usernameLabel.TextColor3 = Color3.fromRGB(255, 200, 255)
+    usernameLabel.TextSize = 12 -- way smaller
 
-    -- === Target Image ===
+    -- === Avatar ===
     local image = Instance.new("ImageLabel")
     image.Name = "TargetingImage"
     image.Parent = frame
     image.BackgroundTransparency = 1
-    image.Position = UDim2.new(0.025, 0, 0.2, 0)
+    image.Position = UDim2.new(0.025, 0, 0.25, 0)
     image.Size = UDim2.new(0, 60, 0, 60)
     image.Image = "rbxasset://textures/ui/GuiImagePlaceholder.png"
 
     local imageCorner = Instance.new("UICorner")
-    imageCorner.CornerRadius = UDim.new(0, 12)
+    imageCorner.CornerRadius = UDim.new(0, 10)
     imageCorner.Parent = image
 
-    -- === Helper to make stats clean ===
-    local function makeStat(titleText, valueName, yOffset, titleColor)
-        local title = Instance.new("TextLabel")
-        title.Name = "Title" .. valueName
-        title.Parent = frame
-        title.BackgroundTransparency = 1
-        title.Position = UDim2.new(0.3, 0, yOffset, 0)
-        title.Size = UDim2.new(0.35, -5, 0, 25)
-        title.Font = Enum.Font.GothamSemibold
-        title.Text = titleText
-        title.TextColor3 = titleColor
-        title.TextScaled = true
+    -- === Stat bars function ===
+    local function makeBar(name, color1, color2, posY)
+        local holder = Instance.new("Frame")
+        holder.Name = name .. "Holder"
+        holder.Parent = frame
+        holder.BackgroundTransparency = 1
+        holder.Position = UDim2.new(0.3, 0, posY, 0)
+        holder.Size = UDim2.new(0.65, 0, 0, 15)
 
-        local value = Instance.new("TextLabel")
-        value.Name = "Value" .. valueName
-        value.Parent = frame
-        value.BackgroundTransparency = 1
-        value.Position = UDim2.new(0.65, 0, yOffset, 0)
-        value.Size = UDim2.new(0.3, 0, 0, 25)
-        value.Font = Enum.Font.GothamBold
-        value.Text = "N/A"
-        value.TextColor3 = Color3.fromRGB(255, 255, 255)
-        value.TextScaled = true
+        -- background bar
+        local bg = Instance.new("Frame")
+        bg.Parent = holder
+        bg.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
+        bg.Size = UDim2.new(1, 0, 1, 0)
+        bg.BorderSizePixel = 0
+        local bgCorner = Instance.new("UICorner", bg)
+        bgCorner.CornerRadius = UDim.new(0, 5)
+
+        -- fill bar (changes with value)
+        local fill = Instance.new("Frame")
+        fill.Name = "Fill"
+        fill.Parent = holder
+        fill.BackgroundColor3 = color1
+        fill.Size = UDim2.new(0, 0, 1, 0)
+        fill.BorderSizePixel = 0
+        local fillCorner = Instance.new("UICorner", fill)
+        fillCorner.CornerRadius = UDim.new(0, 5)
+
+        -- gradient for fancy color
+        local gradient = Instance.new("UIGradient")
+        gradient.Color = ColorSequence.new{
+            ColorSequenceKeypoint.new(0, color1),
+            ColorSequenceKeypoint.new(1, color2)
+        }
+        gradient.Rotation = 90
+        gradient.Parent = fill
+
+        -- stat % label
+        local label = Instance.new("TextLabel")
+        label.Name = "Value"
+        label.Parent = holder
+        label.BackgroundTransparency = 1
+        label.Size = UDim2.new(1, 0, 1, 0)
+        label.Font = Enum.Font.Gotham
+        label.Text = name .. ": 0%"
+        label.TextColor3 = Color3.fromRGB(255, 255, 255)
+        label.TextSize = 11
+        label.TextXAlignment = Enum.TextXAlignment.Center
+
+        return holder
     end
 
-    -- Health, Shield, Downed (in a tidy stack)
-    makeStat("HP:", "Health", 0.3, Color3.fromRGB(185, 255, 174)) -- greenish
-    makeStat("Shield:", "Shield", 0.5, Color3.fromRGB(175, 255, 255)) -- cyan
-    makeStat("Down:", "Downed", 0.7, Color3.fromRGB(255, 151, 151)) -- reddish
+    -- === Create Bars ===
+    gui.HealthBar = makeBar("Health", Color3.fromRGB(85, 255, 128), Color3.fromRGB(0, 200, 100), 0.3)
+    gui.ShieldBar = makeBar("Shield", Color3.fromRGB(85, 200, 255), Color3.fromRGB(0, 100, 255), 0.5)
+    gui.DownedBar = makeBar("Downed", Color3.fromRGB(255, 100, 100), Color3.fromRGB(255, 50, 50), 0.7)
 end
 
--- Update function (updates the UI with new info)
+-- === Update Function ===
 function targetingui.update(data)
     if not gui then return end
 
     local Players = game:GetService("Players")
     local PLACEHOLDER_IMAGE = "rbxassetid://0"
 
-    -- Username
+    -- Update username
     gui.TargetingFrame.TargetUsername.Text = data.username or "Unknown"
 
-    -- Avatar image
+    -- Update avatar
     if data.userid then
         local content, isReady = Players:GetUserThumbnailAsync(data.userid, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size420x420)
         gui.TargetingFrame.TargetingImage.Image = isReady and content or PLACEHOLDER_IMAGE
     end
 
-    -- Stats
-    gui.TargetingFrame.ValueHealth.Text = tostring(data.health or "N/A")
-    gui.TargetingFrame.ValueShield.Text = tostring(data.shield or "N/A")
-    gui.TargetingFrame.ValueDowned.Text = tostring(data.downed or "N/A")
+    -- Helper to update bars
+    local function updateBar(holder, value)
+        value = math.clamp(tonumber(value) or 0, 0, 100)
+        local fill = holder.Fill
+        fill:TweenSize(UDim2.new(value/100, 0, 1, 0), "Out", "Quad", 0.3, true)
+        holder.Value.Text = holder.Name:gsub("Holder","") .. ": " .. value .. "%"
+    end
+
+    updateBar(gui.HealthBar, data.health)
+    updateBar(gui.ShieldBar, data.shield)
+    updateBar(gui.DownedBar, data.downed)
 end
 
 return targetingui

@@ -67,6 +67,21 @@ function targetingui.setup()
     local imageCorner = Instance.new("UICorner")
     imageCorner.CornerRadius = UDim.new(0, 8)
     imageCorner.Parent = image
+    
+    local HealthBar = Instance.new("Frame")
+    HealthBar.Name = "HealthBar"
+    HealthBar.Parent = frame
+    HealthBar.BackgroundTransparency = 1
+    HealthBar.Position = UDim2.new(0.3, 0, 0.75, 0)
+    HealthBar.Size = UDim2.new(0.65, 0, 0, 20)
+
+    local ShieldBar = Instance.new("Frame")
+    ShieldBar.Name = "ShieldBar"
+    ShieldBar.Parent = frame
+    ShieldBar.BackgroundTransparency = 1
+    ShieldBar.Position = UDim2.new(0.3, 0, 0.75, 0)
+    ShieldBar.Size = UDim2.new(0.65, 0, 0, 20)
+    
 
     -- === Stat Bars Creator ===
     local function makeBar(name, color1, color2, posY)

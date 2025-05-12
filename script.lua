@@ -20,17 +20,17 @@ function targetingui.setup()
     frame.BackgroundColor3 = Color3.fromRGB(25, 25, 40)
     frame.BorderSizePixel = 0
     frame.Position = UDim2.new(0.5, -175, 0.75, 0)
-    frame.Size = UDim2.new(0, 350, 0, 140)
+    frame.Size = UDim2.new(0, 350, 0, 160) -- made taller for distance label
 
     local corner = Instance.new("UICorner")
     corner.CornerRadius = UDim.new(0, 6)
     corner.Parent = frame
 
-    -- === Make draggable so it’s easy to move around ===
+    -- === Make draggable ===
     frame.Active = true
     frame.Draggable = true
 
-    -- === Title Label (Targeting UI title) ===
+    -- === Title Label ===
     local titleLabel = Instance.new("TextLabel")
     titleLabel.Name = "TargetTitle"
     titleLabel.Parent = frame
@@ -43,7 +43,7 @@ function targetingui.setup()
     titleLabel.TextSize = 14
     titleLabel.TextXAlignment = Enum.TextXAlignment.Center
 
-    -- === Username label ===
+    -- === Username Label ===
     local usernameLabel = Instance.new("TextLabel")
     usernameLabel.Name = "TargetUsername"
     usernameLabel.Parent = frame
@@ -55,7 +55,7 @@ function targetingui.setup()
     usernameLabel.TextColor3 = Color3.fromRGB(255, 200, 255)
     usernameLabel.TextSize = 16
 
-    -- === Avatar image ===
+    -- === Avatar Image ===
     local image = Instance.new("ImageLabel")
     image.Name = "TargetImage"
     image.Parent = frame
@@ -68,7 +68,7 @@ function targetingui.setup()
     imageCorner.CornerRadius = UDim.new(0, 8)
     imageCorner.Parent = image
 
-    -- === Stat bars creator ===
+    -- === Stat Bars Creator ===
     local function makeBar(name, color1, color2, posY)
         local holder = Instance.new("Frame")
         holder.Name = name .. "Holder"
@@ -82,8 +82,7 @@ function targetingui.setup()
         bg.BackgroundColor3 = Color3.fromRGB(40, 40, 55)
         bg.Size = UDim2.new(1, 0, 1, 0)
         bg.BorderSizePixel = 0
-        local bgCorner = Instance.new("UICorner", bg)
-        bgCorner.CornerRadius = UDim.new(0, 4)
+        Instance.new("UICorner", bg).CornerRadius = UDim.new(0, 4)
 
         local fill = Instance.new("Frame")
         fill.Name = "Fill"
@@ -91,8 +90,7 @@ function targetingui.setup()
         fill.BackgroundColor3 = color1
         fill.Size = UDim2.new(0, 0, 1, 0)
         fill.BorderSizePixel = 0
-        local fillCorner = Instance.new("UICorner", fill)
-        fillCorner.CornerRadius = UDim.new(0, 4)
+        Instance.new("UICorner", fill).CornerRadius = UDim.new(0, 4)
 
         local gradient = Instance.new("UIGradient")
         gradient.Color = ColorSequence.new{
@@ -132,9 +130,22 @@ function targetingui.setup()
     downedLabel.TextColor3 = Color3.fromRGB(255, 100, 100)
     downedLabel.TextSize = 14
     downedLabel.TextXAlignment = Enum.TextXAlignment.Center
+
+    -- === Distance Label ===
+    local distanceLabel = Instance.new("TextLabel")
+    distanceLabel.Name = "DistanceLabel"
+    distanceLabel.Parent = frame
+    distanceLabel.BackgroundTransparency = 1
+    distanceLabel.Position = UDim2.new(0.3, 0, 0.88, 0)
+    distanceLabel.Size = UDim2.new(0.65, 0, 0, 20)
+    distanceLabel.Font = Enum.Font.GothamBold
+    distanceLabel.Text = "Distance: N/A"
+    distanceLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    distanceLabel.TextSize = 14
+    distanceLabel.TextXAlignment = Enum.TextXAlignment.Center
 end
 
--- === Update Function (target info updater) ===
+-- === Update Function ===
 function targetingui.update(data)
     if not gui then return end
 
@@ -143,22 +154,23 @@ function targetingui.update(data)
 
     gui.TargetFrame.TargetUsername.Text = data.username or "Unknown"
 
+    -- === Avatar ===
     if data.userid then
         local content, isReady = Players:GetUserThumbnailAsync(data.userid, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size420x420)
         gui.TargetFrame.TargetImage.Image = isReady and content or PLACEHOLDER_IMAGE
     end
 
+    -- === Update Bars ===
     local function updateBar(holder, value)
         value = math.clamp(tonumber(value) or 0, 0, 100)
         local fill = holder.Fill
         fill:TweenSize(UDim2.new(value/100, 0, 1, 0), "Out", "Quad", 0.3, true)
         holder.Value.Text = holder.Name:gsub("Holder","") .. ": " .. value .. "%"
     end
-
     updateBar(gui.HealthBar, data.health)
     updateBar(gui.ShieldBar, data.shield)
 
-    -- === Downed status update ===
+    -- === Downed Status ===
     if data.downed ~= nil then
         local label = gui.TargetFrame.DownedLabel
         if data.downed == true then
@@ -166,7 +178,27 @@ function targetingui.update(data)
             label.TextColor3 = Color3.fromRGB(255, 50, 50)
         else
             label.Text = "Downed: NO"
-            label.TextColor3 = Color3.fromRGB(85, 255, 128)
+            label.TextColor3 = Color3.fromRGB(100, 255, 100)
+        end
+    end
+
+    -- === Distance (with coloring) ===
+    if data.targetPosition then
+        local player = Players.LocalPlayer
+        if player and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            local playerPos = player.Character.HumanoidRootPart.Position
+            local distance = math.floor((data.targetPosition - playerPos).Magnitude)
+
+            local distanceLabel = gui.TargetFrame.DistanceLabel
+            distanceLabel.Text = "Distance: " .. tostring(distance) .. " studs"
+
+            if distance <= 50 then
+                distanceLabel.TextColor3 = Color3.fromRGB(255, 50, 50) -- Red (close)
+            elseif distance <= 100 then
+                distanceLabel.TextColor3 = Color3.fromRGB(255, 150, 50) -- Orange (medium)
+            else
+                distanceLabel.TextColor3 = Color3.fromRGB(100, 255, 100) -- Green (far)
+            end
         end
     end
 end

@@ -115,8 +115,8 @@ function targetingui.setup()
     end
 
     -- === Create Bars (Health + Shield) ===
-    local healthBar = makeBar("Health", Color3.fromRGB(85, 255, 128), Color3.fromRGB(0, 200, 100), 0.35)
-    local shieldBar = makeBar("Shield", Color3.fromRGB(85, 200, 255), Color3.fromRGB(0, 100, 255), 0.55)
+    frame.HealthBar = makeBar("Health", Color3.fromRGB(85, 255, 128), Color3.fromRGB(0, 200, 100), 0.35)
+    frame.ShieldBar = makeBar("Shield", Color3.fromRGB(85, 200, 255), Color3.fromRGB(0, 100, 255), 0.55)
 
 
     -- === Downed Status Label ===
@@ -168,8 +168,8 @@ function targetingui.update(data)
         fill:TweenSize(UDim2.new(value/100, 0, 1, 0), "Out", "Quad", 0.3, true)
         holder.Value.Text = holder.Name:gsub("Holder","") .. ": " .. value .. "%"
     end
-    updateBar(gui.HealthBar, data.health)
-    updateBar(gui.ShieldBar, data.shield)
+    updateBar(gui.TargetFrame.HealthBar, data.health)
+    updateBar(gui.TargetFrame.ShieldBar, data.shield)
 
     -- === Downed Status ===
     if data.downed ~= nil then

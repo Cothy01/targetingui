@@ -115,8 +115,9 @@ function targetingui.setup()
     end
 
     -- === Create Bars (Health + Shield) ===
-    gui.HealthBar = makeBar("Health", Color3.fromRGB(85, 255, 128), Color3.fromRGB(0, 200, 100), 0.35)
-    gui.ShieldBar = makeBar("Shield", Color3.fromRGB(85, 200, 255), Color3.fromRGB(0, 100, 255), 0.55)
+    local healthBar = makeBar("Health", Color3.fromRGB(85, 255, 128), Color3.fromRGB(0, 200, 100), 0.35)
+    local shieldBar = makeBar("Shield", Color3.fromRGB(85, 200, 255), Color3.fromRGB(0, 100, 255), 0.55)
+
 
     -- === Downed Status Label ===
     local downedLabel = Instance.new("TextLabel")
